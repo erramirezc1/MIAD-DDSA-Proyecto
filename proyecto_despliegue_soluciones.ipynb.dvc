@@ -1,0 +1,5 @@
+outs:
+- md5: 0e544eedf86ad4eb677e36e62995eada
+  size: 329273
+  hash: md5
+  path: proyecto_despliegue_soluciones.ipynb
