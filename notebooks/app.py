@@ -27,7 +27,12 @@ from sklearn.ensemble import RandomForestRegressor, StackingRegressor
 def load_data(path_csv: str | None = None) -> pd.DataFrame:
     base_dir = Path(__file__).resolve().parent
     csv_path = Path(path_csv) if path_csv else base_dir / "Importaciones2024.csv"
-    dfimp24 = pd.read_csv(csv_path, encoding="latin-1") 
+    dfimp24 = pd.read_csv(
+        csv_path,
+        encoding="latin-1",
+        dtype=str,
+        low_memory=False
+    )   
 
     # Limpieza y transformación de datos
     columnas = ['pbk','pnk','naban','canu','vafodo','flete','vacid','vacip','vadua','vrajus','baseiva','totalivayo','seguros','otrosg','porara']
