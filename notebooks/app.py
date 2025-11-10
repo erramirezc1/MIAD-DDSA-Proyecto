@@ -286,114 +286,93 @@ def train_model(df: pd.DataFrame):
 
 # 3) App con Dash
 df_base = load_data()
-MODEL, METRICS, MESES, PAISES, ADUANAS, TIPOS = train_model(df_base)
+MODEL, METRICS, *_ = train_model(df_base)
 
 app = dash.Dash(__name__, meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}])
-app.title = "Predicción CIF USD/kg"
+app.title = "Análisis predictivo de importaciones 2024"
 server = app.server
 app.config.suppress_callback_exceptions = True
 
-# Diseño de la interfaz
-def description_card():
-    return html.Div(
-        id="description-card",
-        children=[
-            html.H3("Predicción de valor CIF"),
-            html.Div(
-                id="intro",
-                children="Ingrese las variables relacionadas a la importación y obtenga una estimación del valor CIF en USD/kg."
-            ),
-        ],
-        style={"padding": "18px"}
-    )
+# Definicion de UI
+PRIMARY = "#0D4C5E"
+LIGHT   = "#F5F7F9" 
+BOX_WIDTH = 420
 
-# Generar controles
-def generate_control_card():
-    return html.Div(
-        id="control-card",
-        children=[
-            html.P("Mes"),
-            dcc.Dropdown(
-                id="ddl-mes",
-                options=[{"label": m, "value": m} for m in MESES],
-                value=6,
-                clearable=False
-            ),
-            html.Br(),
-            html.P("País de origen"),
-            dcc.Dropdown(
-                id="ddl-pais",
-                options=[{"label": p, "value": p} for p in PAISES],
-                value=PAISES[0] if PAISES else None,
-                clearable=False
-            ),
-            html.Br(),
-            html.P("Código aduanero agrupado"),
-            dcc.Dropdown(
-                id="ddl-aduana",
-                options=[{"label": a, "value": a} for a in ADUANAS],
-                value=ADUANAS[0] if ADUANAS else None,
-                clearable=False
-            ),
-            html.Br(),
-            html.P("Tipo de importación"),
-            dcc.Dropdown(
-                id="ddl-tipo",
-                options=[{"label": t, "value": t} for t in TIPOS],
-                value=TIPOS[0] if TIPOS else None,
-                clearable=False
-            ),
-            html.Br(),
-            html.Button("Predecir valor CIF", id="btn-predict", n_clicks=0, style={"width": "100%"}),
-        ],
-        style={"padding": "14px", "backgroundColor": "#252e3f0d", "borderRadius": "8px"}
-    )
+HEADER = html.Div(
+    style={"background": PRIMARY, "color":"#fff", "padding":"14px 20px", "borderRadius":"8px", "marginBottom":"16px"},
+    children=[html.H3("Análisis predictivo de importaciones colombianas en 2024",style={"margin":"0"})]
+)
 
-# Resultado y métricas
-def result_card():
-    return html.Div(
-        id="result-card",
-        children=[
-            html.B("Resultado de la estimación"),
-            html.Hr(),
-            html.Div(id="pred-output", style={
-                "border": "2px solid #05704B",
-                "backgroundColor": "#F5F7F9",
-                "padding": "16px",
-                "borderRadius": "8px",
-                "textAlign": "center",
-                "fontWeight": "700",
-                "fontSize": "22px"
-            }),
-            html.Br(),
-            html.B("Métricas del modelo"),
-            html.Ul([
-                html.Li(f"MAE: {METRICS['MAE']:.2f}"),
-                html.Li(f"RMSE: {METRICS['RMSE']:.2f}"),
-                html.Li(f"R²: {METRICS['R2']:.3f}"),
-            ])
-        ],
-        style={"padding": "14px"}
-    )
+INTRO = html.Div(
+    "Ingrese las variables relacionadas a la importación y obtenga una estimación del valor CIF en USD/kg.",
+    style={"maxWidth":"900px","margin":"8px auto 22px","textAlign":"center","color":"#10151a"}
+)
+
+BTN_STYLE = {"background": PRIMARY, "color":"#fff","fontWeight":"700",
+            "padding":"10px 18px","border":"none","borderRadius":"8px",
+            "width": f"{BOX_WIDTH}px","cursor":"pointer"
+}
+
+RESULT_STYLE = {"border":"2px solid #05704B","background": LIGHT,"padding":"14px 18px",
+                "borderRadius":"8px","textAlign":"center","fontWeight":"700",
+                "fontSize":"22px","width": f"{BOX_WIDTH}px","margin":"0 auto"
+}
+
+# Opciones para controles UI
+Paises_UI = ["China","Estados Unidos","México","Brasil","Alemania","India","Corea del Sur"]
+Aduanas_UI = {48:"Cartagena", 35:"Buenaventura", 19:"Santa Marta", 87:"Barranquilla", 41:"Uraba",
+            89:"Cucuta", 90:"Medellin", 88:"Cali", 16:"Pereira", 4:"Bucaramanga"
+}
+ADUANA_TO_GROUP = {
+    48:"Maritima y Fluvial", 35:"Maritima y Fluvial", 19:"Maritima y Fluvial",
+    87:"Maritima y Fluvial", 41:"Maritima y Fluvial",
+    89:"Aereas y Terrestres", 90:"Aereas y Terrestres", 88:"Aereas y Terrestres",
+    16:"Aereas y Terrestres", 4:"Aereas y Terrestres"
+}
+
+Tipos_UI = ["Ordinaria","Franquicia","Temporal","Reimportación"]
+MAP_TIPO = {
+    "Ordinaria":"Importación ordinaria",
+    "Franquicia":"Importación con franquicia",
+    "Temporal":"Importación temporal",
+    "Reimportación":"Reimportación"
+}
 
 # Layout de la app
 app.layout = html.Div(
-    id="app-container",
+    style={"padding":"16px"},
     children=[
+        HEADER,
+        INTRO,
         html.Div(
-            id="left-column",
-            className="four columns",
-            children=[description_card(), generate_control_card()],
-            style={"maxWidth": "420px"}
+            style={"display":"flex","gap":"28px","alignItems":"flex-start",
+                "justifyContent":"space-between","flexWrap":"wrap"},
+            children=[
+                html.Div([html.H4("Mes"),
+                        dcc.Dropdown(id="ddl-mes",
+                                    options=[{"label":m,"value":m} for m in range(1,13)],
+                                    value=5, clearable=False, style={"minWidth":"140px"})]),
+                html.Div([html.H4("País de origen"),
+                        dcc.Dropdown(id="ddl-pais",
+                                    options=[{"label":p,"value":p} for p in Paises_UI],
+                                    value="China", clearable=False, style={"minWidth":"220px"})]),
+                html.Div([html.H4("Código aduanero"),
+                        dcc.Dropdown(id="ddl-aduana",
+                                    options=[{"label":f"{k} = {v}","value":k} for k,v in Aduanas_UI.items()],
+                                    value=48, clearable=False, style={"minWidth":"220px"})]),
+                html.Div([html.H4("Tipo importación"),
+                        dcc.Dropdown(id="ddl-tipo",
+                                    options=[{"label":t,"value":t} for t in Tipos_UI],
+                                    value="Ordinaria", clearable=False, style={"minWidth":"220px"})]),
+            ],
         ),
-        html.Div(
-            id="right-column",
-            className="eight columns",
-            children=[result_card()],
-            style={"marginLeft": "32px", "flex": "1"}
-        )
-    ],
-    style={"display": "flex", "padding": "18px"}
+        html.Br(),
+        html.Div(style={"textAlign":"center"}, children=[
+            html.Button("Predecir valor CIF", id="btn-predict", n_clicks=0, style=BTN_STYLE)
+        ]),
+        html.Br(),
+        html.Div(id="pred-output", style=RESULT_STYLE),
+    ]
 )
 
 # Callback para la predicción
@@ -408,16 +387,19 @@ app.layout = html.Div(
 )
 
 # Función de predicción
-def predict_value(n_clicks, mes, pais, aduana, tipoimp):
-    # Armar fila de entrada en el mismo esquema que el entrenamiento
+def predict_value(n_clicks, mes, pais_ui, aduana_code, tipo_ui):
+    aduana_group = ADUANA_TO_GROUP.get(aduana_code, "Aereas y Terrestres")
+    tipo_model = MAP_TIPO.get(tipo_ui, tipo_ui)
+
     x = {
         "fech": mes,
         "sin_fech": np.sin(2*np.pi*mes/12.0),
         "cos_fech": np.cos(2*np.pi*mes/12.0),
-        "adua": aduana,
-        "paispro": pais,
-        "tipoim": tipoimp
+        "adua": aduana_group,
+        "paispro": pais_ui,
+        "tipoim": tipo_model
     }
+
     X_row = pd.DataFrame([x], columns=["fech","sin_fech","cos_fech","adua","paispro","tipoim"])
     pred = MODEL.predict(X_row)[0]
     return f"{pred:,.0f} USD/kg"
