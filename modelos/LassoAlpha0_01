@@ -22,28 +22,24 @@ X_train = scaler.fit_transform(X_train)
 X_test = scaler.transform(X_test)
 
 with mlflow.start_run(experiment_id=experiment.experiment_id):
-    alpha = 1
-    solver = 'auto'
-    max_iter = 1000
+    alpha = 0.001
     
-    # Modelo Ridge
-    modelo_ridge = Ridge(alpha=alpha, solver=solver, max_iter=max_iter)  # Ajusta alpha para más regularización
-    modelo_ridge.fit(X_train, y_train)
+    # Modelo Lasso
+    modelo_lasso = Lasso(alpha=alpha)  # Ajusta alpha según sea necesario
+    modelo_lasso.fit(X_train, y_train)
 
-    # Predicción
-    y_pred_ridge = modelo_ridge.predict(X_test)
-    
+    y_pred_lasso = modelo_lasso.predict(X_test)
+
     mlflow.log_param("alpha", alpha)
-    mlflow.log_param("solver", solver)
-    mlflow.log_param("max_iter", max_iter)
 
     # Evaluación del modelo
-    mae_ridge = mean_absolute_error(y_test, y_pred_ridge)
-    rmse_ridge = mean_squared_error(y_test, y_pred_ridge)
-    r2_ridge = r2_score(y_test, y_pred_ridge)
-    
+    mae_lasso = mean_absolute_error(y_test, y_pred_lasso)
+    rmse_lasso = mean_squared_error(y_test, y_pred_lasso)
+    r2_lasso = r2_score(y_test, y_pred_lasso)
+
     # Registre el modelo
-    mlflow.sklearn.log_model(modelo_ridge, "ridge_modelo")
-    mlflow.log_metric("mae", mae_ridge)
-    mlflow.log_metric("rmse", rmse_ridge)
-    mlflow.log_metric("r2", r2_ridge)
+    mlflow.sklearn.log_model(modelo_lasso, "lasso_modelo")
+    mlflow.log_metric("mae", mae_lasso)
+    mlflow.log_metric("rmse", rmse_lasso)
+    mlflow.log_metric("r2", r2_lasso)
+    print(f"Lasso MAE: {mae_lasso}, RMSE: {rmse_lasso}, R2: {r2_lasso}")
