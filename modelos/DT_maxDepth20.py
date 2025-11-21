@@ -6,7 +6,7 @@ from sklearn.tree import DecisionTreeRegressor
 import mlflow
 import mlflow.sklearn
 
-dataframe = pd.read_csv("Importaciones2024limpia_modelos.csv")
+dataframe = pd.read_csv("../data/Importaciones2024limpia_modelos.csv")
 
 
 mlflow.set_tracking_uri("http://localhost:8050")
