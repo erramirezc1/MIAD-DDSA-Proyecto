@@ -13,7 +13,7 @@ python setup.py bdist_wheel
 pip install dist/modelo_importaciones-1.0.0-py3-none-any.whl
 ```
 
-2. Instala las dependencias de la API:
+1. Instala las dependencias de la API:
 
 ```bash
 cd api
@@ -42,8 +42,8 @@ La API estará disponible en: `http://localhost:8000`
 
 Una vez que la API esté corriendo, puedes acceder a:
 
-- **Swagger UI**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
+- **Swagger UI**: <http://localhost:8000/docs>
+- **ReDoc**: <http://localhost:8000/redoc>
 
 ## Endpoints
 
@@ -56,6 +56,7 @@ Endpoint raíz con información de la API.
 Verifica el estado de la API y si el modelo está cargado.
 
 **Ejemplo de respuesta:**
+
 ```json
 {
   "status": "healthy",
@@ -68,6 +69,7 @@ Verifica el estado de la API y si el modelo está cargado.
 Obtiene información sobre el modelo y las categorías disponibles.
 
 **Ejemplo de respuesta:**
+
 ```json
 {
   "paises_disponibles": ["América", "Asia", "Europa", ...],
@@ -86,12 +88,14 @@ Obtiene información sobre el modelo y las categorías disponibles.
 Realiza una predicción del valor CIF usando el modelo entrenado.
 
 **Parámetros de entrada:**
+
 - `mes` (int): Mes del año (1-12)
 - `pais_pro` (str): País de origen (ej: "América", "Asia", "Europa")
 - `aduana` (str): Tipo de aduana ("Maritima y Fluvial" o "Aereas y Terrestres")
 - `tipo_importacion` (str): Tipo de importación (ej: "Importación ordinaria")
 
 **Ejemplo de solicitud:**
+
 ```json
 {
   "mes": 5,
@@ -102,6 +106,7 @@ Realiza una predicción del valor CIF usando el modelo entrenado.
 ```
 
 **Ejemplo de respuesta:**
+
 ```json
 {
   "prediccion": 12345.67,
@@ -134,9 +139,27 @@ curl -X POST "http://localhost:8000/predict" \
   }'
 ```
 
+## Despliegue en EC2 AWS
+
+Dentro de la carpeta `deploy_api/` se encuentra todo lo necesario para desplegar la API en una máquina EC2 de AWS con Ubuntu:
+
+- `main.py` - Aplicación FastAPI lista para producción
+- `requirements.txt` - Dependencias de la API
+- `modelo_importaciones-1.0.0-py3-none-any.whl` - Modelo entrenado empaquetado
+- `setup-ubuntu.sh` - Script de instalación automática para Ubuntu EC2
+- `README.md` - Guía completa de despliegue
+
+Para desplegar:
+
+1. Transfiere la carpeta `deploy_api/` a tu instancia EC2
+2. Ejecuta `./setup-ubuntu.sh` para instalar todo automáticamente
+3. La API estará disponible en el puerto 8001
+
+Ver `deploy_api/README.md` para instrucciones detalladas de despliegue.
+
 ## Notas
 
 - El modelo NO se reentrena al usar la API, solo se carga desde el paquete instalado.
 - Asegúrate de haber ejecutado `train_model.py` antes de construir el paquete.
 - El modelo debe estar en `modelo_paquete/modelo_importaciones/model/` antes de construir el .whl.
-
+- La carpeta `deploy_api/` contiene todo lo necesario para desplegar en EC2 sin necesidad de reentrenar el modelo.
