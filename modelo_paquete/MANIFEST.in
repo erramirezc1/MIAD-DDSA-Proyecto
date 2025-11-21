@@ -1,0 +1,3 @@
+include modelo_importaciones/model/*.pkl
+recursive-include modelo_importaciones/model *.pkl
+

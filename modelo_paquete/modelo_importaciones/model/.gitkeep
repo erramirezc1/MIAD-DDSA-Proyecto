@@ -1,0 +1,3 @@
+# Este directorio contiene el modelo entrenado
+# Los archivos .pkl se generan al ejecutar train_model.py
+
