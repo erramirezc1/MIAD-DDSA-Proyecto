@@ -22,9 +22,9 @@ X_train = scaler.fit_transform(X_train)
 X_test = scaler.transform(X_test)
 
 with mlflow.start_run(experiment_id=experiment.experiment_id):
-    alpha = 1
+    alpha = 100
     solver = 'auto'
-    max_iter = 1000
+    max_iter = 5000
     
     # Modelo Ridge
     modelo_ridge = Ridge(alpha=alpha, solver=solver, max_iter=max_iter)  # Ajusta alpha para más regularización
