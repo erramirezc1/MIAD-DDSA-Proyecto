@@ -7,7 +7,7 @@ Guía rápida para desplegar la API de Predicción de Importaciones en EC2 con U
 ### 1. Transferir archivos a EC2
 
 ```bash
-scp -r deploy/ ubuntu@tu-ec2-ip:/home/ubuntu/api-importaciones/
+scp -r api/deploy_api/ ubuntu@tu-ec2-ip:/home/ubuntu/api-importaciones/
 ```
 
 ### 2. Conectar y ejecutar setup
@@ -92,3 +92,4 @@ curl -X POST "http://tu-ec2-ip:8001/predict" \
 - Optimizado para Ubuntu 20.04+ en EC2
 - Usa entorno virtual (venv) para evitar conflictos con el sistema
 - Listo para producción
+

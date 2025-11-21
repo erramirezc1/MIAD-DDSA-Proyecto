@@ -20,13 +20,13 @@ Este proyecto contiene la extracción del modelo de regresión lineal entrenado 
 │   ├── main.py                       # Aplicación FastAPI principal
 │   ├── requirements.txt              # Dependencias de la API
 │   ├── ejemplo_uso.py                # Ejemplos de uso
-│   └── README.md                     # Documentación de la API
-├── deploy/                           # Carpeta para despliegue en EC2 Ubuntu
-│   ├── main.py                       # Aplicación FastAPI
-│   ├── requirements.txt              # Dependencias
-│   ├── modelo_importaciones-1.0.0-py3-none-any.whl  # Modelo entrenado
-│   ├── setup-ubuntu.sh               # Script de instalación automática
-│   └── README.md                     # Guía de despliegue
+│   ├── README.md                     # Documentación de la API
+│   └── deploy_api/                   # Carpeta para despliegue en EC2 Ubuntu
+│       ├── main.py                   # Aplicación FastAPI
+│       ├── requirements.txt          # Dependencias
+│       ├── modelo_importaciones-1.0.0-py3-none-any.whl  # Modelo entrenado
+│       ├── setup-ubuntu.sh           # Script de instalación automática
+│       └── README.md                 # Guía de despliegue
 └── notebooks/                        # Notebooks originales
     └── Importaciones2024.csv         # Datos de entrenamiento
 ```
@@ -169,13 +169,13 @@ print(f"Valor CIF predicho: {prediccion:.2f} USD/kg")
 
 ## Despliegue en EC2 Ubuntu
 
-Para desplegar la API en una instancia EC2 con Ubuntu, usa la carpeta `deploy/`:
+Para desplegar la API en una instancia EC2 con Ubuntu, usa la carpeta `api/deploy_api/`:
 
-1. Transfiere la carpeta `deploy/` a tu EC2
+1. Transfiere la carpeta `api/deploy_api/` a tu EC2
 2. Ejecuta el script de instalación: `./setup-ubuntu.sh`
 3. La API se ejecutará en el puerto 8001
 
-Ver `deploy/README.md` para instrucciones detalladas.
+Ver `api/deploy_api/README.md` para instrucciones detalladas.
 
 ## Características Importantes
 
@@ -184,7 +184,7 @@ Ver `deploy/README.md` para instrucciones detalladas.
 - **Validación de entrada** - Usa Pydantic para validar los parámetros
 - **Documentación automática** - Swagger UI y ReDoc incluidos
 - **Manejo de errores** - Respuestas HTTP apropiadas para errores
-- **Despliegue en EC2** - Carpeta `deploy/` lista para producción  
+- **Despliegue en EC2** - Carpeta `api/deploy_api/` lista para producción  
 
 ## Notas
 
@@ -192,8 +192,8 @@ Ver `deploy/README.md` para instrucciones detalladas.
 - El modelo debe estar en `modelo_paquete/modelo_importaciones/model/` antes de construir el .whl
 - El paquete .whl puede ser instalado en cualquier entorno Python compatible
 - La API local (`api/`) usa el puerto 8000
-- La API de despliegue (`deploy/`) usa el puerto 8001 y está optimizada para EC2 Ubuntu
-- La carpeta `deploy/` contiene todo lo necesario para desplegar sin reentrenar el modelo
+- La API de despliegue (`api/deploy_api/`) usa el puerto 8001 y está optimizada para EC2 Ubuntu
+- La carpeta `api/deploy_api/` contiene todo lo necesario para desplegar sin reentrenar el modelo
 
 ## Solución de Problemas
 
