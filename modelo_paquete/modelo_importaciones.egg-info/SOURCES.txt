@@ -1,0 +1,12 @@
+MANIFEST.in
+README.md
+setup.py
+modelo_importaciones/__init__.py
+modelo_importaciones/modelo.py
+modelo_importaciones.egg-info/PKG-INFO
+modelo_importaciones.egg-info/SOURCES.txt
+modelo_importaciones.egg-info/dependency_links.txt
+modelo_importaciones.egg-info/requires.txt
+modelo_importaciones.egg-info/top_level.txt
+modelo_importaciones/model/modelo_info.pkl
+modelo_importaciones/model/modelo_regresion_lineal.pkl
