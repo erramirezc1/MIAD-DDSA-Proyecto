@@ -1,4 +1,4 @@
-# Despliegue en EC2 Ubuntu
+# Despliegue API en EC2 Ubuntu
 
 Guía rápida para desplegar la API de Predicción de Importaciones en EC2 con Ubuntu.
 
@@ -7,7 +7,7 @@ Guía rápida para desplegar la API de Predicción de Importaciones en EC2 con U
 ### 0. Lance una instancia en AWS EC2
 
 Lance una instancia en AWS EC2. Se recomienda una máquina t2.small, con sistema operativo
-Ubuntu y 20GB de disco. No olvide crear y descar la `llave.pem`
+Ubuntu y 20GB de disco. No olvide crear y descargar la `llave.pem`
 
 ### 1. Transferir archivos a EC2
 
