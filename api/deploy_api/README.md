@@ -116,3 +116,4 @@ curl -X POST "http://tu-ec2-ip:8001/predict" \
 - `requirements.txt` - Dependencias
 - `modelo_importaciones-1.0.0-py3-none-any.whl` - Modelo entrenado
 - `setup-ubuntu.sh` - Script de instalación automática
+
