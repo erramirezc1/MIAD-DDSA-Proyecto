@@ -1,4 +1,6 @@
-# Despliegue en EC2 Ubuntu
+# Manuel de Despliegue API en EC2 Ubuntu
+
+---
 
 Guía rápida para desplegar la API de Predicción de Importaciones en EC2 con Ubuntu.
 
@@ -9,18 +11,51 @@ Guía rápida para desplegar la API de Predicción de Importaciones en EC2 con U
 Lance una instancia en AWS EC2. Se recomienda una máquina t2.small, con sistema operativo
 Ubuntu y 20GB de disco. No olvide crear y descargar su `llave.pem`
 
-### 1. Transferir archivos a EC2
+## Pasos
+
+### 1. Lanzar una instancia en AWS EC2
+
+Lance una instancia en AWS EC2. Se recomienda una máquina t2.small, con sistema operativo
+Ubuntu y 20GB de disco. No olvide crear y descargar la `llave.pem`
+
+### 2. Transferir archivos a EC2
+
+Desde su equipo con el repositorio clonado, en una terminal puede ejecutar el siguiente comando para cargar los archivos necesario para desplegar el api en la instancia.
 
 ```bash
 scp -i llave.pem -r api/deploy_api/ ubuntu@tu-ec2-ip:/home/ubuntu/api-importaciones/
 ```
 
-### 2. Conectar y ejecutar setup
+### 3. Conectar y ejecutar setup
+
+Desde la misma terminal puede ejecutar el siguiente comando para conectarse a la instancia a través de ssh.
 
 ```bash
 ssh -i llave.pem ubuntu@tu-ec2-ip
+```
+
+Una vez dentro del maquina, debe dirigirse a la ruta donde fueron cargados los archivos.
+
+```bash
+cd /home/ubuntu/api-importaciones/deploy
+```
+
+Luego, debe darle permisos al archivo setup-ubuntu.sh para que logre instalar todo lo necesario en la instancia.
+
+```bash
+<<<<<<< HEAD
+ssh -i llave.pem ubuntu@tu-ec2-ip
 cd /home/ubuntu/api-importaciones
+=======
+>>>>>>> 23be77170ee9036ea1dcecd6f8c15a02f9225999
 chmod +x setup-ubuntu.sh
+
+
+```
+
+Por último, debe ejecutar el archivo.
+
+```bash
 ./setup-ubuntu.sh
 ```
 
@@ -30,19 +65,22 @@ El script configura todo automáticamente:
 - Instala el modelo y dependencias de la API
 - Configura firewall (ufw)
 
-### 3. Configurar Security Group en AWS
+### 4. Configurar Security Group en AWS
 
-En la consola de EC2:
+En la consola de EC2 dentro de la instancia debe ir al `Seguridad > Grupos de seguridad` y luego darle en la opción `editar reglas de entrada`, una vez allí debe agregar una nueva regla con las siguientes características:
 
-- Puerto: 8001
 - Protocolo: TCP
-- Origen: 0.0.0.0/0 (o restringir según necesidad)
+- Puerto: 8001
+- Origen: Anywhere-IPv4 0.0.0.0/0 (o restringir según necesidad)
 
 ## Iniciar la API
 
 El script crea un entorno virtual automáticamente. Para iniciar la API:
 
 ```bash
+# Valide o ingrese a la siguiente ruta
+cd /home/ubuntu/api-importaciones/deploy
+
 # Activar el entorno virtual
 source venv/bin/activate
 
@@ -78,7 +116,7 @@ curl -X POST "http://tu-ec2-ip:8001/predict" \
   -H "Content-Type: application/json" \
   -d '{
     "mes": 5,
-    "pais_pro": "América",
+    "pais_pro": "America",
     "aduana": "Maritima y Fluvial",
     "tipo_importacion": "Importación ordinaria"
   }'
@@ -90,11 +128,3 @@ curl -X POST "http://tu-ec2-ip:8001/predict" \
 - `requirements.txt` - Dependencias
 - `modelo_importaciones-1.0.0-py3-none-any.whl` - Modelo entrenado
 - `setup-ubuntu.sh` - Script de instalación automática
-
-## Notas
-
-- El modelo NO se reentrena, solo se carga desde el paquete
-- Optimizado para Ubuntu 20.04+ en EC2
-- Usa entorno virtual (venv) para evitar conflictos con el sistema
-- Listo para producción
-
