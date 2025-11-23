@@ -43,14 +43,7 @@ cd /home/ubuntu/api-importaciones/deploy
 Luego, debe darle permisos al archivo setup-ubuntu.sh para que logre instalar todo lo necesario en la instancia.
 
 ```bash
-<<<<<<< HEAD
-ssh -i llave.pem ubuntu@tu-ec2-ip
-cd /home/ubuntu/api-importaciones
-=======
->>>>>>> 23be77170ee9036ea1dcecd6f8c15a02f9225999
 chmod +x setup-ubuntu.sh
-
-
 ```
 
 Por último, debe ejecutar el archivo.
