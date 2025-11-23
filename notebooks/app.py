@@ -21,6 +21,9 @@ from sklearn.decomposition import PCA
 from sklearn.cross_decomposition import PLSRegression
 from sklearn.tree import DecisionTreeRegressor, plot_tree
 from sklearn.ensemble import RandomForestRegressor, StackingRegressor
+# librerias para conexion a API
+import os
+import requests
 
 
 # 1) Carga y limpieza de datos
@@ -238,144 +241,261 @@ def load_data(path_csv: str | None = None) -> pd.DataFrame:
     return df
 
 # 2) Entrenamiento del modelo
-def train_model(df: pd.DataFrame):
-    target = 'vacid'
-    features = ['fech','sin_fech','cos_fech','adua','paispro','tipoim']
+# def train_model(df: pd.DataFrame):
+#     target = 'vacid'
+#     features = ['fech','sin_fech','cos_fech','adua','paispro','tipoim']
 
-    X = df[features].copy()
-    y = df[target].copy()
+#     X = df[features].copy()
+#     y = df[target].copy()
 
-    num_cols = ['fech','sin_fech','cos_fech']
-    cat_cols = ['adua','paispro','tipoim']
+#     num_cols = ['fech','sin_fech','cos_fech']
+#     cat_cols = ['adua','paispro','tipoim']
 
-    # Pipeline de preprocesamiento y modelo
-    preprocess = ColumnTransformer(
-        transformers=[
-            ('num', StandardScaler(), num_cols),
-            ('cat', OneHotEncoder(handle_unknown='ignore', drop='first'), cat_cols)
-        ]
-    )
+#     # Pipeline de preprocesamiento y modelo
+#     preprocess = ColumnTransformer(
+#         transformers=[
+#             ('num', StandardScaler(), num_cols),
+#             ('cat', OneHotEncoder(handle_unknown='ignore', drop='first'), cat_cols)
+#         ]
+#     )
     
-    # Crear pipeline completo con modelo de regresion lineal
-    pipe = Pipeline(steps=[
-        ('prep', preprocess),
-        ('reg', LinearRegression())
-    ])
+#     # Crear pipeline completo con modelo de regresion lineal
+#     pipe = Pipeline(steps=[
+#         ('prep', preprocess),
+#         ('reg', LinearRegression())
+#     ])
 
-    # División de datos en entrenamiento y prueba
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+#     # División de datos en entrenamiento y prueba
+#     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    # Entrenamiento y predicción de modelo
-    pipe.fit(X_train, y_train)
-    y_pred = pipe.predict(X_test)
+#     # Entrenamiento y predicción de modelo
+#     pipe.fit(X_train, y_train)
+#     y_pred = pipe.predict(X_test)
 
-    # Cálculo de métricas de desempeño
-    metrics = {
-        "MAE": float(mean_absolute_error(y_test, y_pred)),
-        "RMSE": float(np.sqrt(((y_test - y_pred) ** 2).mean())),
-        "R2": float(r2_score(y_test, y_pred))
-    }
+#     # Cálculo de métricas de desempeño
+#     metrics = {
+#         "MAE": float(mean_absolute_error(y_test, y_pred)),
+#         "RMSE": float(np.sqrt(((y_test - y_pred) ** 2).mean())),
+#         "R2": float(r2_score(y_test, y_pred))
+#     }
 
-    # Opciones para controles del tablero
-    meses = list(range(1, 13))
-    paises = sorted(X['paispro'].dropna().astype(str).unique().tolist())
-    aduanas = sorted(X['adua'].dropna().astype(str).unique().tolist())
-    tipos = sorted(X['tipoim'].dropna().astype(str).unique().tolist())
+#     # Opciones para controles del tablero
+#     meses = list(range(1, 13))
+#     paises = sorted(X['paispro'].dropna().astype(str).unique().tolist())
+#     aduanas = sorted(X['adua'].dropna().astype(str).unique().tolist())
+#     tipos = sorted(X['tipoim'].dropna().astype(str).unique().tolist())
 
-    return pipe, metrics, meses, paises, aduanas, tipos
+#     return pipe, metrics, meses, paises, aduanas, tipos
 
 # 3) App con Dash
-df_base = load_data()
-MODEL, METRICS, *_ = train_model(df_base)
-
-app = dash.Dash(__name__, meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}])
+app = dash.Dash(
+    __name__,
+    meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}],
+)
 app.title = "Análisis predictivo de importaciones 2024"
 server = app.server
 app.config.suppress_callback_exceptions = True
 
+# URL base de la API de predicción
+API_URL = os.getenv("API_URL", "http://localhost:8001")
+
 # Definicion de UI
 PRIMARY = "#0D4C5E"
-LIGHT   = "#F5F7F9" 
+LIGHT = "#F5F7F9"
 BOX_WIDTH = 420
 
 HEADER = html.Div(
-    style={"background": PRIMARY, "color":"#fff", "padding":"14px 20px", "borderRadius":"8px", "marginBottom":"16px"},
-    children=[html.H3("Análisis predictivo de importaciones colombianas en 2024",style={"margin":"0"})]
+    style={
+        "background": PRIMARY,
+        "color": "#fff",
+        "padding": "14px 20px",
+        "borderRadius": "8px",
+        "marginBottom": "16px",
+    },
+    children=[
+        html.H3(
+            "Análisis predictivo de importaciones colombianas en 2024",
+            style={"margin": "0"},
+        )
+    ],
 )
 
 INTRO = html.Div(
     "Ingrese las variables relacionadas a la importación y obtenga una estimación del valor CIF en USD/kg.",
-    style={"maxWidth":"900px","margin":"8px auto 22px","textAlign":"center","color":"#10151a"}
+    style={
+        "maxWidth": "900px",
+        "margin": "8px auto 22px",
+        "textAlign": "center",
+        "color": "#10151a",
+    },
 )
 
-BTN_STYLE = {"background": PRIMARY, "color":"#fff","fontWeight":"700",
-            "padding":"10px 18px","border":"none","borderRadius":"8px",
-            "width": f"{BOX_WIDTH}px","cursor":"pointer"
+BTN_STYLE = {
+    "background": PRIMARY,
+    "color": "#fff",
+    "fontWeight": "700",
+    "padding": "10px 18px",
+    "border": "none",
+    "borderRadius": "8px",
+    "width": f"{BOX_WIDTH}px",
+    "cursor": "pointer",
 }
 
-RESULT_STYLE = {"border":"2px solid #05704B","background": LIGHT,"padding":"14px 18px",
-                "borderRadius":"8px","textAlign":"center","fontWeight":"700",
-                "fontSize":"22px","width": f"{BOX_WIDTH}px","margin":"0 auto"
+RESULT_STYLE = {
+    "border": "2px solid #05704B",
+    "background": LIGHT,
+    "padding": "14px 18px",
+    "borderRadius": "8px",
+    "textAlign": "center",
+    "fontWeight": "700",
+    "fontSize": "22px",
+    "width": f"{BOX_WIDTH}px",
+    "margin": "0 auto",
 }
 
 # Opciones para controles UI
-Paises_UI = ["China","Estados Unidos","México","Brasil","Alemania","India","Corea del Sur"]
-Aduanas_UI = {48:"Cartagena", 35:"Buenaventura", 19:"Santa Marta", 87:"Barranquilla", 41:"Uraba",
-            89:"Cucuta", 90:"Medellin", 88:"Cali", 16:"Pereira", 4:"Bucaramanga"
-}
-ADUANA_TO_GROUP = {
-    48:"Maritima y Fluvial", 35:"Maritima y Fluvial", 19:"Maritima y Fluvial",
-    87:"Maritima y Fluvial", 41:"Maritima y Fluvial",
-    89:"Aereas y Terrestres", 90:"Aereas y Terrestres", 88:"Aereas y Terrestres",
-    16:"Aereas y Terrestres", 4:"Aereas y Terrestres"
+Paises_UI = [
+    "China",
+    "Estados Unidos",
+    "México",
+    "Brasil",
+    "Alemania",
+    "India",
+    "Corea del Sur",
+]
+
+# Mapeo de país mostrado en UI a continente que espera la API
+PAIS_TO_CONTINENTE = {
+    "China": "Asia",
+    "India": "Asia",
+    "Corea del Sur": "Asia",
+    "Alemania": "Europa",
+    "Estados Unidos": "America",
+    "México": "America",
+    "Brasil": "America",
 }
 
-Tipos_UI = ["Ordinaria","Franquicia","Temporal","Reimportación"]
+# Aduanas_UI = {
+#     48: "Cartagena",
+#     35: "Buenaventura",
+#     19: "Santa Marta",
+#     87: "Barranquilla",
+#     41: "Uraba",
+#     89: "Cucuta",
+#     90: "Medellin",
+#     88: "Cali",
+#     16: "Pereira",
+#     4: "Bucaramanga",
+# }
+
+# ADUANA_TO_GROUP = {
+#     48: "Maritima y Fluvial",
+#     35: "Maritima y Fluvial",
+#     19: "Maritima y Fluvial",
+#     87: "Maritima y Fluvial",
+#     41: "Maritima y Fluvial",
+#     89: "Aereas y Terrestres",
+#     90: "Aereas y Terrestres",
+#     88: "Aereas y Terrestres",
+#     16: "Aereas y Terrestres",
+#     4: "Aereas y Terrestres",
+# }
+
+# Lista de aduanas agrupadas para UI
+ADUANAS_UI = ["Maritima y Fluvial", "Aereas y Terrestres"]
+
+# Lista de tipos de importación para UI
+Tipos_UI = ["Ordinaria", "Franquicia", "Temporal", "Reimportación"]
 MAP_TIPO = {
-    "Ordinaria":"Importación ordinaria",
-    "Franquicia":"Importación con franquicia",
-    "Temporal":"Importación temporal",
-    "Reimportación":"Reimportación"
+    "Ordinaria": "Importación ordinaria",
+    "Franquicia": "Importación con franquicia",
+    "Temporal": "Importación temporal",
+    "Reimportación": "Reimportación",
 }
 
 # Layout de la app
 app.layout = html.Div(
-    style={"padding":"16px"},
+    style={"padding": "16px"},
     children=[
         HEADER,
         INTRO,
         html.Div(
-            style={"display":"flex","gap":"28px","alignItems":"flex-start",
-                "justifyContent":"space-between","flexWrap":"wrap"},
+            style={
+                "display": "flex",
+                "gap": "28px",
+                "alignItems": "flex-start",
+                "justifyContent": "space-between",
+                "flexWrap": "wrap",
+            },
             children=[
-                html.Div([html.H4("Mes"),
-                        dcc.Dropdown(id="ddl-mes",
-                                    options=[{"label":m,"value":m} for m in range(1,13)],
-                                    value=5, clearable=False, style={"minWidth":"140px"})]),
-                html.Div([html.H4("País de origen"),
-                        dcc.Dropdown(id="ddl-pais",
-                                    options=[{"label":p,"value":p} for p in Paises_UI],
-                                    value="China", clearable=False, style={"minWidth":"220px"})]),
-                html.Div([html.H4("Código aduanero"),
-                        dcc.Dropdown(id="ddl-aduana",
-                                    options=[{"label":f"{k} = {v}","value":k} for k,v in Aduanas_UI.items()],
-                                    value=48, clearable=False, style={"minWidth":"220px"})]),
-                html.Div([html.H4("Tipo importación"),
-                        dcc.Dropdown(id="ddl-tipo",
-                                    options=[{"label":t,"value":t} for t in Tipos_UI],
-                                    value="Ordinaria", clearable=False, style={"minWidth":"220px"})]),
+                html.Div(
+                    [
+                        html.H4("Mes"),
+                        dcc.Dropdown(
+                            id="ddl-mes",
+                            options=[{"label": m, "value": m} for m in range(1, 13)],
+                            value=5,
+                            clearable=False,
+                            style={"minWidth": "140px"},
+                        ),
+                    ]
+                ),
+                html.Div(
+                    [
+                        html.H4("País de origen"),
+                        dcc.Dropdown(
+                            id="ddl-pais",
+                            options=[{"label": p, "value": p} for p in Paises_UI],
+                            value="China",
+                            clearable=False,
+                            style={"minWidth": "220px"},
+                        ),
+                    ]
+                ),
+                html.Div(
+                    [
+                        html.H4("Aduana"),
+                        dcc.Dropdown(
+                            id="ddl-aduana",
+                            options=[{"label": a, "value": a} for a in ADUANAS_UI],
+                            value="Maritima y Fluvial",
+                            clearable=False,
+                            style={"minWidth": "220px"},
+                        ),
+                    ]
+                ),
+                html.Div(
+                    [
+                        html.H4("Tipo importación"),
+                        dcc.Dropdown(
+                            id="ddl-tipo",
+                            options=[{"label": t, "value": t} for t in Tipos_UI],
+                            value="Ordinaria",
+                            clearable=False,
+                            style={"minWidth": "220px"},
+                        ),
+                    ]
+                ),
             ],
         ),
         html.Br(),
-        html.Div(style={"textAlign":"center"}, children=[
-            html.Button("Predecir valor CIF", id="btn-predict", n_clicks=0, style=BTN_STYLE)
-        ]),
+        html.Div(
+            style={"textAlign": "center"},
+            children=[
+                html.Button(
+                    "Predecir valor CIF",
+                    id="btn-predict",
+                    n_clicks=0,
+                    style=BTN_STYLE,
+                )
+            ],
+        ),
         html.Br(),
         html.Div(id="pred-output", style=RESULT_STYLE),
-    ]
+    ],
 )
 
-# Callback para la predicción
+# Callback para realizar la predicción al hacer clic en el botón
 @app.callback(
     Output("pred-output", "children"),
     Input("btn-predict", "n_clicks"),
@@ -383,27 +503,47 @@ app.layout = html.Div(
     State("ddl-pais", "value"),
     State("ddl-aduana", "value"),
     State("ddl-tipo", "value"),
-    prevent_initial_call=True
+    prevent_initial_call=True,
 )
+def predict_value(n_clicks, mes, pais_ui, aduana, tipo_ui):
+    if n_clicks is None:
+        return dash.no_update
 
-# Función de predicción
-def predict_value(n_clicks, mes, pais_ui, aduana_code, tipo_ui):
-    aduana_group = ADUANA_TO_GROUP.get(aduana_code, "Aereas y Terrestres")
     tipo_model = MAP_TIPO.get(tipo_ui, tipo_ui)
 
-    x = {
-        "fech": mes,
-        "sin_fech": np.sin(2*np.pi*mes/12.0),
-        "cos_fech": np.cos(2*np.pi*mes/12.0),
-        "adua": aduana_group,
-        "paispro": pais_ui,
-        "tipoim": tipo_model
+    payload = {
+        "mes": mes,
+        "pais_pro": pais_ui,        
+        "aduana": aduana,      
+        "tipo_importacion": tipo_model
     }
 
-    X_row = pd.DataFrame([x], columns=["fech","sin_fech","cos_fech","adua","paispro","tipoim"])
-    pred = MODEL.predict(X_row)[0]
-    return f"{pred:,.0f} USD/kg"
+    try:
+        resp = requests.post(f"{API_URL}/predict", json=payload, timeout=5)
+    except requests.RequestException as e:
+        print("Error de conexión con la API:", e)
+        return "No fue posible comunicarse con la API. Revise la URL y que el servicio esté activo."
+
+    if resp.status_code != 200:
+        print("Error de la API, status:", resp.status_code, "cuerpo:", resp.text)
+        return f"Error de la API. Código {resp.status_code}."
+
+    try:
+        data = resp.json()
+    except ValueError:
+        return "La API respondió en un formato que no es JSON válido."
+
+    pred = data.get("prediccion")
+    if pred is None:
+        return "La API no devolvió el campo 'prediccion'."
+
+    try:
+        pred_float = float(pred)
+    except (TypeError, ValueError):
+        return "La API devolvió una predicción que no es numérica."
+
+    return f"{pred_float:,.0f} USD/kg"
 
 # Ejecutar la app
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run(debug=True, host="0.0.0.0", port=8050)
