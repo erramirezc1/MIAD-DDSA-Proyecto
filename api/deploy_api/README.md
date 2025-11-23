@@ -12,14 +12,14 @@ Ubuntu y 20GB de disco. No olvide crear y descar la `llave.pem`
 ### 1. Transferir archivos a EC2
 
 ```bash
-scp -i -i llave.pem -r api/deploy_api/ ubuntu@tu-ec2-ip:/home/ubuntu/api-importaciones/
+scp -i llave.pem -r api/deploy_api/ ubuntu@tu-ec2-ip:/home/ubuntu/api-importaciones/
 ```
 
 ### 2. Conectar y ejecutar setup
 
 ```bash
-ssh -i -i llave.pem ubuntu@tu-ec2-ip
-cd /home/ubuntu/api-importaciones
+ssh -i llave.pem ubuntu@tu-ec2-ip
+cd /home/ubuntu/api-importaciones/deploy
 chmod +x setup-ubuntu.sh
 ./setup-ubuntu.sh
 ```
@@ -32,17 +32,20 @@ El script configura todo automáticamente:
 
 ### 3. Configurar Security Group en AWS
 
-En la consola de EC2:
+En la consola de EC2 dentro de la instancia debe ir al `Seguridad > Grupos de seguridad` y luego darle en el opción `editar reglas de entrada`, una vez allí debe agregar una nueva reglas con las siguientes características:
 
-- Puerto: 8001
 - Protocolo: TCP
-- Origen: 0.0.0.0/0 (o restringir según necesidad)
+- Puerto: 8001
+- Origen: Anywhere-IPv4 0.0.0.0/0 (o restringir según necesidad)
 
 ## Iniciar la API
 
 El script crea un entorno virtual automáticamente. Para iniciar la API:
 
 ```bash
+# Valide o ingrese a la siguiente ruta
+cd /home/ubuntu/api-importaciones/deploy
+
 # Activar el entorno virtual
 source venv/bin/activate
 
@@ -90,11 +93,3 @@ curl -X POST "http://tu-ec2-ip:8001/predict" \
 - `requirements.txt` - Dependencias
 - `modelo_importaciones-1.0.0-py3-none-any.whl` - Modelo entrenado
 - `setup-ubuntu.sh` - Script de instalación automática
-
-## Notas
-
-- El modelo NO se reentrena, solo se carga desde el paquete
-- Optimizado para Ubuntu 20.04+ en EC2
-- Usa entorno virtual (venv) para evitar conflictos con el sistema
-- Listo para producción
-
