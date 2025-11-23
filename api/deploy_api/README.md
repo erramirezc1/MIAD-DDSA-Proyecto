@@ -39,6 +39,8 @@ Luego, debe darle permisos al archivo setup-ubuntu.sh para que logre instalar to
 
 ```bash
 chmod +x setup-ubuntu.sh
+
+
 ```
 
 Por último, debe ejecutar el archivo.
