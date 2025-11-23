@@ -8,12 +8,12 @@ Guía rápida para desplegar la API de Predicción de Importaciones en EC2 con U
 
 ## Pasos
 
-### 0. Lanzar una instancia en AWS EC2
+### 1. Lanzar una instancia en AWS EC2
 
 Lance una instancia en AWS EC2. Se recomienda una máquina t2.small, con sistema operativo
 Ubuntu y 20GB de disco. No olvide crear y descargar la `llave.pem`
 
-### 1. Transferir archivos a EC2
+### 2. Transferir archivos a EC2
 
 Desde su equipo con el repositorio clonado, en una terminal puede ejecutar el siguiente comando para cargar los archivos necesario para desplegar el api en la instancia.
 
@@ -21,7 +21,7 @@ Desde su equipo con el repositorio clonado, en una terminal puede ejecutar el si
 scp -i llave.pem -r api/deploy_api/ ubuntu@tu-ec2-ip:/home/ubuntu/api-importaciones/
 ```
 
-### 2. Conectar y ejecutar setup
+### 3. Conectar y ejecutar setup
 
 Desde la misma terminal puede ejecutar el siguiente comando para conectarse a la instancia a través de ssh.
 
@@ -55,7 +55,7 @@ El script configura todo automáticamente:
 - Instala el modelo y dependencias de la API
 - Configura firewall (ufw)
 
-### 3. Configurar Security Group en AWS
+### 4. Configurar Security Group en AWS
 
 En la consola de EC2 dentro de la instancia debe ir al `Seguridad > Grupos de seguridad` y luego darle en la opción `editar reglas de entrada`, una vez allí debe agregar una nueva regla con las siguientes características:
 
