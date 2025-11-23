@@ -81,7 +81,7 @@ curl -X POST "http://tu-ec2-ip:8001/predict" \
   -H "Content-Type: application/json" \
   -d '{
     "mes": 5,
-    "pais_pro": "América",
+    "pais_pro": "America",
     "aduana": "Maritima y Fluvial",
     "tipo_importacion": "Importación ordinaria"
   }'
