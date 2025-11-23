@@ -4,13 +4,6 @@
 
 Guía rápida para desplegar la API de Predicción de Importaciones en EC2 con Ubuntu.
 
-## Pasos:
-
-### 0. Crear instancia EC2 en la consola de AWS
-
-Lance una instancia en AWS EC2. Se recomienda una máquina t2.small, con sistema operativo
-Ubuntu y 20GB de disco. No olvide crear y descargar su `llave.pem`
-
 ## Pasos
 
 ### 1. Lanzar una instancia en AWS EC2
@@ -44,6 +37,8 @@ Luego, debe darle permisos al archivo setup-ubuntu.sh para que logre instalar to
 
 ```bash
 chmod +x setup-ubuntu.sh
+
+
 ```
 
 Por último, debe ejecutar el archivo.
