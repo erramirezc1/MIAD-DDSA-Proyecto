@@ -1,12 +1,5 @@
 # Manuel de Despliegue API en EC2 Ubuntu
 
-**Grupo 7:**
-
-- Lady Tatiana García ​
-- Edwin Ricardo Ramírez ​
-- Omar Leonardo Albarracín​
-- Joaquín Abondano
-
 ---
 
 Guía rápida para desplegar la API de Predicción de Importaciones en EC2 con Ubuntu.
@@ -37,15 +30,21 @@ ssh -i llave.pem ubuntu@tu-ec2-ip
 ```
 
 Una vez dentro del maquina, debe dirigirse a la ruta donde fueron cargados los archivos.
+
 ```bash
 cd /home/ubuntu/api-importaciones/deploy
 ```
 
 Luego, debe darle permisos al archivo setup-ubuntu.sh para que logre instalar todo lo necesario en la instancia.
+
 ```bash
 chmod +x setup-ubuntu.sh
+
+
 ```
-Por ultimo debe ejecutar el archivo.
+
+Por último, debe ejecutar el archivo.
+
 ```bash
 ./setup-ubuntu.sh
 ```
@@ -58,7 +57,7 @@ El script configura todo automáticamente:
 
 ### 3. Configurar Security Group en AWS
 
-En la consola de EC2 dentro de la instancia debe ir al `Seguridad > Grupos de seguridad` y luego darle en el opción `editar reglas de entrada`, una vez allí debe agregar una nueva reglas con las siguientes características:
+En la consola de EC2 dentro de la instancia debe ir al `Seguridad > Grupos de seguridad` y luego darle en la opción `editar reglas de entrada`, una vez allí debe agregar una nueva regla con las siguientes características:
 
 - Protocolo: TCP
 - Puerto: 8001
