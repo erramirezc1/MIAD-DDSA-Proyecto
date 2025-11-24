@@ -1,4 +1,4 @@
-# Manuel de Despliegue API y tablero interactivo en EC2 Ubuntu
+# Manual de Despliegue API y tablero interactivo en EC2 Ubuntu
 
 ---
 
