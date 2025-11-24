@@ -1,8 +1,8 @@
-# Manuel de Despliegue API en EC2 Ubuntu
+# Manuel de Despliegue API y tablero interactivo en EC2 Ubuntu
 
 ---
 
-Guía rápida para desplegar la API de Predicción de Importaciones en EC2 con Ubuntu.
+Guía rápida para desplegar la API y el tablero de Predicción de Importaciones en EC2 con Ubuntu.
 
 ## Pasos
 
@@ -16,13 +16,13 @@ Ubuntu y 20GB de disco. No olvide crear y descargar la `llave.pem`
 Crea las carpetas necesarias en maquina
 
 ```bash
-ssh -i .\llave.pem ubuntu@tu-ec2-ip "mkdir -p /home/ubuntu/api-importaciones"
+ssh -i .\llave.pem ubuntu@ec2-ip "mkdir -p /home/ubuntu/api-importaciones"
 ```
 
 Desde su equipo con el repositorio clonado, en una terminal puede ejecutar el siguiente comando para cargar los archivos necesario para desplegar el api en la instancia.
 
 ```bash
-scp -i llave.pem -r api/deploy/ ubuntu@tu-ec2-ip:/home/ubuntu/api-importaciones/
+scp -i llave.pem -r api/deploy/ ubuntu@ec2-ip:/home/ubuntu/api-importaciones/
 ```
 
 ### 3. Conectar y ejecutar setup
@@ -30,7 +30,7 @@ scp -i llave.pem -r api/deploy/ ubuntu@tu-ec2-ip:/home/ubuntu/api-importaciones/
 Desde la misma terminal puede ejecutar el siguiente comando para conectarse a la instancia a través de ssh.
 
 ```bash
-ssh -i llave.pem ubuntu@tu-ec2-ip
+ssh -i llave.pem ubuntu@ec2-ip
 ```
 
 Una vez dentro del maquina, debe dirigirse a la ruta donde fueron cargados los archivos.
@@ -44,22 +44,21 @@ Luego, Instalar dos2unix si no está instalado
 ```bash
 sudo apt-get update
 sudo apt-get install -y dos2unix
-
 ```
 
-a continuacion convertir el archivo
+A continuacion convertir el archivo
 
 ```bash
 dos2unix setup-ubuntu.sh
 ```
 
-Ahora debes darle permisos de ejecución
+Ahora debe darle permisos de ejecución
 
 ```bash
 chmod +x setup-ubuntu.sh
 ```
 
-Por ultimo, ejecuta el archivo
+Por ultimo, ejecute el archivo
 
 ```bash
 ./setup-ubuntu.sh
@@ -84,6 +83,20 @@ Y agregar otra regla para la aplicación Dash:
 - Puerto: 8050 (para la aplicación Dash)
 - Origen: Anywhere-IPv4 0.0.0.0/0 (o restringir según necesidad)
 
+## Puertos y URLs de acceso
+
+En este proyecto se usan dos servicios:
+
+- API FastAPI
+  - Puerto: 8001
+  - URL interna en la instancia: http://localhost:8001
+  - URL externa: http://ec2-ip:8001
+
+- Aplicación Dash (tablero)
+  - Puerto: 8050
+  - URL interna en la instancia: http://localhost:8050
+  - URL externa: http://ec2-ip:8050
+
 ## Iniciar la API y la aplicación Dash
 
 El script crea un entorno virtual automáticamente. Para iniciar los servicios:
@@ -107,7 +120,7 @@ nohup uvicorn main:app --host 0.0.0.0 --port 8001 > api.log 2>&1 &
 ### Iniciar la aplicación Dash
 
 ```bash
-# Asegúrate de estar en el directorio correcto y con el entorno virtual activado
+# Asegurese de estar en el directorio correcto y con el entorno virtual activado
 cd /home/ubuntu/api-importaciones/deploy
 source venv/bin/activate
 
@@ -118,10 +131,10 @@ python app_dash.py
 nohup python app_dash.py > dash.log 2>&1 &
 ```
 
-**Nota:** La aplicación Dash se conecta a la API en `http://localhost:8001` por defecto. Si la API está en otra ubicación, configura la variable de entorno `API_URL` antes de ejecutar:
+**Nota:** La aplicación Dash se conecta a la API en `http://localhost:8001` por defecto. Si la API está en otra ubicación, configure la variable de entorno `API_URL` antes de ejecutar:
 
 ```bash
-export API_URL=http://tu-servidor-api:8001
+export API_URL=http://servidor-api:8001
 python app_dash.py
 ```
 
@@ -139,6 +152,22 @@ tail -f api.log
 tail -f dash.log
 ```
 
+## Cómo visualizar el tablero en el navegador
+
+Una vez que:
+- La API esté corriendo en el puerto 8001, y  
+- La aplicación Dash esté corriendo en el puerto 8050,
+
+puede acceder al tablero desde cualquier navegador con la IP pública de la instancia EC2.
+
+1. Obtenga la IP pública de su instancia en la consola de AWS.
+2. En el navegador escriba:
+   ```text
+   http://ec2-ip:8050
+   ```
+
+Con estos pasos puede visualizar el tablero directamente desde el navegador. La aplicación permite ingresar parámetros de importación (mes, país de origen, aduana, tipo de importación) y obtener predicciones del valor CIF en USD/kg de forma interactiva.
+
 ## Endpoints
 
 - `GET /` - Información de la API
@@ -150,11 +179,11 @@ tail -f dash.log
 ## Ejemplo de Uso
 
 ```bash
-curl -X POST "http://tu-ec2-ip:8001/predict" \
+curl -X POST "http://ec2-ip:8001/predict" \
   -H "Content-Type: application/json" \
   -d '{
-    "mes": 5,
-    "pais_pro": "America",
+    "mes": 10,
+    "pais_pro": "China",
     "aduana": "Maritima y Fluvial",
     "tipo_importacion": "Importación ordinaria"
   }'
@@ -167,11 +196,3 @@ curl -X POST "http://tu-ec2-ip:8001/predict" \
 - `requirements.txt` - Dependencias
 - `modelo_importaciones-1.0.0-py3-none-any.whl` - Modelo entrenado
 - `setup-ubuntu.sh` - Script de instalación automática
-
-## Acceso a la Aplicación Dash
-
-Una vez iniciada, la aplicación Dash estará disponible en:
-- `http://tu-ec2-ip:8050`
-
-La aplicación permite ingresar parámetros de importación (mes, país de origen, aduana, tipo de importación) y obtener predicciones del valor CIF de forma interactiva.
-
